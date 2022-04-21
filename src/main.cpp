@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "BMI088.h"
 
+#include "data.h"
+
 /* Enum responsible for representing the states of flight:
 
   nav_converge:   calibration of the GPS, IMU, and Barometer
@@ -23,35 +25,18 @@ enum system_state {
     grounded
 } state;
 
-Bmi088Accel accel(Wire, 0x18);
-Bmi088Gyro gyro(Wire, 0x68);
-
-float f_accelX;
-float f_accelY;
-float f_accelZ;
-float f_gyroX;
-float f_gyroY;
-float f_gyroZ;
-
 void setup() {
     state = nav_converge;
     Serial.begin(9600);
-
-    int status;
-
-    status = accel.begin();
-    if (status < 0) {
-        Serial.println("ERROR: failed accel init");
-    }
-
-    status = gyro.begin();
-    if (status < 0) {
-        Serial.println("ERROR: failed gyro init");
-    }
+    
+    setupSensors();
 
 }
 
 void loop() {
+
+    updateSensors();
+
     switch (state) {
 
         case nav_converge:
