@@ -29,20 +29,27 @@ void setup() {
     state = nav_converge;
     Serial.begin(9600);
     
-    setupSensors();
-
+    initSensors();
+    delay(500);
 }
 
 void loop() {
 
-    updateSensors();
-
     switch (state) {
 
         case nav_converge:
+            calibrateSensors();
+            logCalibration();
+
+            if (millis() > 10000) {
+                state = pad_idle;
+                Serial.println("STATE: Moving to pad_idle state");
+            }
             break;
 
         case pad_idle:
+            updateSensors();
+            logSensors();
             break;
 
         case burn:
