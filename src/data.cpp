@@ -14,7 +14,7 @@
 #define BARO_ERR_OFFSET 2
 #define FLASH_ERR_OFFSET 3
 
-const float u_groundLevel = 119.0f;
+const float u_groundLevel = 103.632f;
 const float u_altitudeConstant = pow(1 - u_groundLevel / 44330.0, -5.2549) / 100.0;
 
 // Calibration values
@@ -171,13 +171,13 @@ void logCalibration() {
 
 void logSensors() {
 
-    Serial.print("Accel (m/s2): ");
-    Serial.print(f_accelX);
-    Serial.print(", ");
-    Serial.print(f_accelY);
-    Serial.print(", ");
-    Serial.print(f_accelZ);
-    Serial.print("\t");
+    // Serial.print("Accel (m/s2): ");
+    // Serial.print(f_accelX);
+    // Serial.print(", ");
+    // Serial.print(f_accelY);
+    // Serial.print(", ");
+    // Serial.print(f_accelZ);
+    // Serial.print("\t");
 
     Serial.print("Alt (m): ");
     Serial.print(f_AGL);
@@ -185,4 +185,8 @@ void logSensors() {
 
     Serial.print("Temp (c): ");
     Serial.println(f_temperature);
+}
+
+void debugLog() {
+    Serial.println(f_ASL);
 }

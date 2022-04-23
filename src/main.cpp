@@ -35,6 +35,8 @@ void setup() {
 
 void loop() {
 
+    //debugLog();
+
     switch (state) {
 
         case nav_converge:

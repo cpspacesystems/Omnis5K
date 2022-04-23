@@ -10,3 +10,5 @@ void updateSensors();
 void logSensors();
 
 void logCalibration();
+
+void debugLog();
