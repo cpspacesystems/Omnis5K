@@ -3,6 +3,7 @@
 
 #include "data.h"
 #include "telemetry.h"
+#include "log.h"
 
 // State thresholds
 
@@ -38,6 +39,7 @@ void setup() {
     
     data_init();
     telemetry_init();
+    log_init();
     delay(500);
 }
 
@@ -45,6 +47,7 @@ void loop() {
 
     data_update();
     telemetry_send();
+    log_debugLog();
 
     switch (state) {
         case nav_converge:
@@ -97,6 +100,6 @@ void loop() {
 
     }
 
-    logSensors();
+    //logSensors();
 
 }

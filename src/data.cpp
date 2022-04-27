@@ -63,7 +63,7 @@ void data_init() {
     error_assert(baro.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_15), 1, BARO_ERR_OFFSET, "baro.setIIRFilterCoeff");
     error_assert(baro.setOutputDataRate(BMP3_ODR_200_HZ), 1, BARO_ERR_OFFSET, "baro.setOutputDataRate");
 
-    Serial.print("INIT: Accel");
+    Serial.println("INIT: Accel");
 
     error_assert(accel.begin(), 1, ACCEL_ERR_OFFSET, "accel.begin()");
     error_assert(accel.setOdr(Bmi088Accel::ODR_1600HZ_BW_280HZ), 1, ACCEL_ERR_OFFSET, "accel.setOdr()");
