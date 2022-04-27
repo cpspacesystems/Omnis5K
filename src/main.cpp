@@ -2,6 +2,13 @@
 #include "BMI088.h"
 
 #include "data.h"
+#include "telemetry.h"
+
+// State thresholds
+
+#define BURN_ACCEL 12 // Acceleration (m/s2) which when exceeded the state will change to burn
+#define COAST_ACCEL 10 // When the acceleration (m/s2) is under this value, the state will change from burn to coast
+#define APOGEE_THRESH 1 // The distance (m) between the highest altitude recorded and the current altitude to switch to post_apogee
 
 /* Enum responsible for representing the states of flight:
 
@@ -29,19 +36,21 @@ void setup() {
     state = nav_converge;
     Serial.begin(9600);
     
-    initSensors();
+    data_init();
+    telemetry_init();
     delay(500);
 }
 
 void loop() {
 
-    //debugLog();
+    data_update();
+    telemetry_send();
 
     switch (state) {
-
         case nav_converge:
-            calibrateSensors();
-            logCalibration();
+            Serial.print("NAV_CONV ");
+
+            data_calibrate();
 
             if (millis() > 10000) {
                 state = pad_idle;
@@ -50,17 +59,34 @@ void loop() {
             break;
 
         case pad_idle:
-            updateSensors();
-            logSensors();
+            Serial.print("PAD_IDLE ");
+
+            if (data_accel() > BURN_ACCEL) {
+                state = burn;
+                Serial.println("STATE: Moving to burn state");
+            }
             break;
 
         case burn:
+            Serial.print("BURN ");
+
+            if (data_accel() < COAST_ACCEL) {
+                state = coast;
+                Serial.println("STATE: Moving to coast state");
+            }
             break;
 
         case coast:
+            Serial.print("COAST ");
+
+            if (data_maxAltitude() > data_smoothAltitude() + APOGEE_THRESH) {
+                state = post_apogee;
+                Serial.println("STATE: Moving to post_apogee state");
+            }
             break;
 
         case post_apogee:
+            Serial.print("POST APOGEE ");
             break;
 
         case chute_deployed:
@@ -70,5 +96,7 @@ void loop() {
             break;
 
     }
+
+    logSensors();
 
 }

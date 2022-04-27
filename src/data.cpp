@@ -19,7 +19,7 @@ const float u_altitudeConstant = pow(1 - u_groundLevel / 44330.0, -5.2549) / 100
 
 // Calibration values
 
-int c_calibrations = 0;
+unsigned int c_calibrations = 0;
 
 float c_groundPressure = 0;
 float c_seaPressure;
@@ -46,9 +46,13 @@ float f_ASL;
 float f_AGL;
 float f_temperature;
 
+float f_smoothAGL = 0;
+float f_maxAltitude = 0;
+
 float f_accelX;
 float f_accelY;
 float f_accelZ;
+float f_accelMag;
 
 float f_gyroX;
 float f_gyroY;
@@ -58,38 +62,38 @@ uint8_t f_initStatus = 0x00;
 
 Quaternion orientation;
 
-void checkErr(int val, int no_err_val, int err_offset, String err_message) {
+void data_err(int val, int no_err_val, int err_offset, String err_message) {
     if (val != no_err_val) {
         Serial.println("ERROR: " + err_message);
         f_initStatus |= 1 << err_offset;
     }
 }
 
-void initSensors() {
+void data_init() {
 
     Serial.println("INIT: baro");
 
-    checkErr(baro.begin_I2C(BARO_I2C), 1, BARO_ERR_OFFSET, "baro.begin_I2C");
-    checkErr(baro.setTemperatureOversampling(BMP3_NO_OVERSAMPLING), 1, BARO_ERR_OFFSET, "baro.setTemperatureOversampling");
-    checkErr(baro.setPressureOversampling(BMP3_OVERSAMPLING_8X), 1, BARO_ERR_OFFSET, "baro.setPressureOversampling");
-    checkErr(baro.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_15), 1, BARO_ERR_OFFSET, "baro.setIIRFilterCoeff");
-    checkErr(baro.setOutputDataRate(BMP3_ODR_200_HZ), 1, BARO_ERR_OFFSET, "baro.setOutputDataRate");
+    data_err(baro.begin_I2C(BARO_I2C), 1, BARO_ERR_OFFSET, "baro.begin_I2C");
+    data_err(baro.setTemperatureOversampling(BMP3_NO_OVERSAMPLING), 1, BARO_ERR_OFFSET, "baro.setTemperatureOversampling");
+    data_err(baro.setPressureOversampling(BMP3_OVERSAMPLING_8X), 1, BARO_ERR_OFFSET, "baro.setPressureOversampling");
+    data_err(baro.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_15), 1, BARO_ERR_OFFSET, "baro.setIIRFilterCoeff");
+    data_err(baro.setOutputDataRate(BMP3_ODR_200_HZ), 1, BARO_ERR_OFFSET, "baro.setOutputDataRate");
 
     Serial.println("INIT: Flash");
 
-    checkErr(flash.begin(), 1, FLASH_ERR_OFFSET, "flash.initialize()");
+    data_err(flash.begin(), 1, FLASH_ERR_OFFSET, "flash.initialize()");
 
     Serial.print("INIT: Accel");
 
-    checkErr(accel.begin(), 1, ACCEL_ERR_OFFSET, "accel.begin()");
-    checkErr(accel.setOdr(Bmi088Accel::ODR_1600HZ_BW_280HZ), 1, ACCEL_ERR_OFFSET, "accel.setOdr()");
-    checkErr(accel.setRange(Bmi088Accel::RANGE_12G), 1, ACCEL_ERR_OFFSET, "accel.setRange()");
+    data_err(accel.begin(), 1, ACCEL_ERR_OFFSET, "accel.begin()");
+    data_err(accel.setOdr(Bmi088Accel::ODR_1600HZ_BW_280HZ), 1, ACCEL_ERR_OFFSET, "accel.setOdr()");
+    data_err(accel.setRange(Bmi088Accel::RANGE_12G), 1, ACCEL_ERR_OFFSET, "accel.setRange()");
     
     Serial.println("INIT: Gyro");
 
-    checkErr(gyro.begin(), 1, GYRO_ERR_OFFSET, "gyro.begin()");
-    checkErr(gyro.setOdr(Bmi088Gyro::ODR_400HZ_BW_47HZ), 1, GYRO_ERR_OFFSET, "gyro.setOdr()");
-    checkErr(gyro.setRange(Bmi088Gyro::RANGE_1000DPS), 1, GYRO_ERR_OFFSET, "gyro.setRange()");
+    data_err(gyro.begin(), 1, GYRO_ERR_OFFSET, "gyro.begin()");
+    data_err(gyro.setOdr(Bmi088Gyro::ODR_400HZ_BW_47HZ), 1, GYRO_ERR_OFFSET, "gyro.setOdr()");
+    data_err(gyro.setRange(Bmi088Gyro::RANGE_1000DPS), 1, GYRO_ERR_OFFSET, "gyro.setRange()");
 
     orientation = Quaternion();
 
@@ -98,7 +102,7 @@ void initSensors() {
     f_deltaTime = 0.0f;
 }
 
-void calibrateSensors() {
+void data_calibrate() {
 
     baro.performReading();
     gyro.readSensor();
@@ -121,7 +125,7 @@ void calibrateSensors() {
     c_calibrations++;
 }
 
-void updateSensors() {
+void data_update() {
 
     // Update timing
 
@@ -136,6 +140,11 @@ void updateSensors() {
     f_ASL = baro.readAltitude(c_seaPressure);
     f_AGL = f_ASL - u_groundLevel;
     f_temperature = baro.readTemperature();
+    if (c_calibrations > 10) f_smoothAGL = f_smoothAGL + (f_AGL - f_smoothAGL) * 0.05f;
+
+    if (f_smoothAGL > f_maxAltitude) {
+        f_maxAltitude = f_smoothAGL;
+    }
 
     // Update accelerometer data
 
@@ -144,6 +153,7 @@ void updateSensors() {
     f_accelX = accel.getAccelX_mss();
     f_accelY = accel.getAccelY_mss();
     f_accelZ = accel.getAccelZ_mss();
+    f_accelMag = sqrt(sq(f_accelX) + sq(f_accelY) + sq(f_accelZ));
 
     // Update gyroscope data
 
@@ -163,6 +173,22 @@ void updateSensors() {
     orientation = a * orientation;
 }
 
+float data_accel() {
+    return f_accelMag;
+}
+
+float data_altitude() {
+    return f_AGL;
+}
+
+float data_smoothAltitude() {
+    return f_smoothAGL;
+}
+
+float data_maxAltitude() {
+    return f_maxAltitude;
+}
+
 void logCalibration() {
     Serial.print("Sea Pressure (pa): " + String(c_seaPressure) + "\t");
     Serial.print("Gyro bias (r/s2): " + String(c_gyroBiasX) + ", " + String(c_gyroBiasY) + ", " + String(c_gyroBiasZ) + "\t");
@@ -171,22 +197,29 @@ void logCalibration() {
 
 void logSensors() {
 
-    // Serial.print("Accel (m/s2): ");
-    // Serial.print(f_accelX);
-    // Serial.print(", ");
-    // Serial.print(f_accelY);
-    // Serial.print(", ");
-    // Serial.print(f_accelZ);
-    // Serial.print("\t");
+    Serial.print("Accel (m/s2): ");
+    Serial.print(f_accelMag);
+    Serial.print("\t");
 
-    Serial.print("Alt (m): ");
-    Serial.print(f_AGL);
+    //Serial.print("Accel (m/s2): ");
+    //Serial.print(f_accelX);
+    //Serial.print(", ");
+    //Serial.print(f_accelY);
+    //Serial.print(", ");
+    //Serial.print(f_accelZ);
+    //Serial.print("\t");
+
+    Serial.print("Smooth Alt (m): ");
+    Serial.print(f_smoothAGL);
+    Serial.print("\t");
+
+    Serial.print("Max alt (m): ");
+    Serial.print(f_maxAltitude);
     Serial.print("\t");
 
     Serial.print("Temp (c): ");
     Serial.println(f_temperature);
-}
 
-void debugLog() {
-    Serial.println(f_ASL);
+    //Serial.println(String(orientation.a) + ", " + String(orientation.b) + ", " + String(orientation.c) + ", " + String(orientation.d));
+
 }

@@ -80,8 +80,8 @@ const Quaternion Quaternion::from_euler_rotation_approx(float yaw, float pitch, 
     return ret;
 }
 
-const Quaternion Quaternion::from_axis_angle(float angle, float x, float y, float z)
-{
+const Quaternion Quaternion::from_axis_angle(float angle, float x, float y, float z) {
+    
     float sa = sin(angle / 2);
 
     Quaternion ret;
