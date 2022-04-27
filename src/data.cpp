@@ -1,18 +1,12 @@
+#include <Arduino.h>
 #include "BMI088.h"
 #include "Adafruit_BMP3XX.h"
 #include "Quaternion.h"
-#include "SPIMemory.h"
-#include <Arduino.h>
+#include "error.h"
 
-#define FLASH_PIN 0x0A
 #define ACCEL_I2C 0x18
 #define GYRO_I2C 0x68
 #define BARO_I2C 0x76
-
-#define ACCEL_ERR_OFFSET 0
-#define GYRO_ERR_OFFSET 1
-#define BARO_ERR_OFFSET 2
-#define FLASH_ERR_OFFSET 3
 
 const float u_groundLevel = 103.632f;
 const float u_altitudeConstant = pow(1 - u_groundLevel / 44330.0, -5.2549) / 100.0;
@@ -33,7 +27,6 @@ float c_gyroBiasZ;
 Bmi088Accel accel(Wire, ACCEL_I2C);
 Bmi088Gyro gyro(Wire, GYRO_I2C);
 Adafruit_BMP3XX baro;
-SPIFlash flash(FLASH_PIN);
 
 // Flight variables
 
@@ -58,42 +51,29 @@ float f_gyroX;
 float f_gyroY;
 float f_gyroZ;
 
-uint8_t f_initStatus = 0x00;
-
 Quaternion orientation;
-
-void data_err(int val, int no_err_val, int err_offset, String err_message) {
-    if (val != no_err_val) {
-        Serial.println("ERROR: " + err_message);
-        f_initStatus |= 1 << err_offset;
-    }
-}
 
 void data_init() {
 
     Serial.println("INIT: baro");
 
-    data_err(baro.begin_I2C(BARO_I2C), 1, BARO_ERR_OFFSET, "baro.begin_I2C");
-    data_err(baro.setTemperatureOversampling(BMP3_NO_OVERSAMPLING), 1, BARO_ERR_OFFSET, "baro.setTemperatureOversampling");
-    data_err(baro.setPressureOversampling(BMP3_OVERSAMPLING_8X), 1, BARO_ERR_OFFSET, "baro.setPressureOversampling");
-    data_err(baro.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_15), 1, BARO_ERR_OFFSET, "baro.setIIRFilterCoeff");
-    data_err(baro.setOutputDataRate(BMP3_ODR_200_HZ), 1, BARO_ERR_OFFSET, "baro.setOutputDataRate");
-
-    Serial.println("INIT: Flash");
-
-    data_err(flash.begin(), 1, FLASH_ERR_OFFSET, "flash.initialize()");
+    error_assert(baro.begin_I2C(BARO_I2C), 1, BARO_ERR_OFFSET, "baro.begin_I2C");
+    error_assert(baro.setTemperatureOversampling(BMP3_NO_OVERSAMPLING), 1, BARO_ERR_OFFSET, "baro.setTemperatureOversampling");
+    error_assert(baro.setPressureOversampling(BMP3_OVERSAMPLING_8X), 1, BARO_ERR_OFFSET, "baro.setPressureOversampling");
+    error_assert(baro.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_15), 1, BARO_ERR_OFFSET, "baro.setIIRFilterCoeff");
+    error_assert(baro.setOutputDataRate(BMP3_ODR_200_HZ), 1, BARO_ERR_OFFSET, "baro.setOutputDataRate");
 
     Serial.print("INIT: Accel");
 
-    data_err(accel.begin(), 1, ACCEL_ERR_OFFSET, "accel.begin()");
-    data_err(accel.setOdr(Bmi088Accel::ODR_1600HZ_BW_280HZ), 1, ACCEL_ERR_OFFSET, "accel.setOdr()");
-    data_err(accel.setRange(Bmi088Accel::RANGE_12G), 1, ACCEL_ERR_OFFSET, "accel.setRange()");
+    error_assert(accel.begin(), 1, ACCEL_ERR_OFFSET, "accel.begin()");
+    error_assert(accel.setOdr(Bmi088Accel::ODR_1600HZ_BW_280HZ), 1, ACCEL_ERR_OFFSET, "accel.setOdr()");
+    error_assert(accel.setRange(Bmi088Accel::RANGE_12G), 1, ACCEL_ERR_OFFSET, "accel.setRange()");
     
     Serial.println("INIT: Gyro");
 
-    data_err(gyro.begin(), 1, GYRO_ERR_OFFSET, "gyro.begin()");
-    data_err(gyro.setOdr(Bmi088Gyro::ODR_400HZ_BW_47HZ), 1, GYRO_ERR_OFFSET, "gyro.setOdr()");
-    data_err(gyro.setRange(Bmi088Gyro::RANGE_1000DPS), 1, GYRO_ERR_OFFSET, "gyro.setRange()");
+    error_assert(gyro.begin(), 1, GYRO_ERR_OFFSET, "gyro.begin()");
+    error_assert(gyro.setOdr(Bmi088Gyro::ODR_400HZ_BW_47HZ), 1, GYRO_ERR_OFFSET, "gyro.setOdr()");
+    error_assert(gyro.setRange(Bmi088Gyro::RANGE_1000DPS), 1, GYRO_ERR_OFFSET, "gyro.setRange()");
 
     orientation = Quaternion();
 
@@ -187,6 +167,20 @@ float data_smoothAltitude() {
 
 float data_maxAltitude() {
     return f_maxAltitude;
+}
+
+void data_valuesArray(float* array) {
+    array[0] = f_pressure;
+    array[1] = f_ASL;
+    array[2] = f_AGL;
+    array[3] = f_smoothAGL;
+    array[4] = f_temperature;
+    array[5] = f_accelX;
+    array[6] = f_accelY;
+    array[7] = f_accelZ;
+    array[8] = f_gyroX;
+    array[9] = f_gyroY;
+    array[10] = f_gyroZ;
 }
 
 void logCalibration() {
