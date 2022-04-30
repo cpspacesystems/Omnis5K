@@ -178,6 +178,10 @@ float data_maxAltitude() {
     return f_maxAltitude;
 }
 
+float data_velocityX() {
+    return f_velocityX;
+}
+
 void data_valuesArray(float* array) {
     array[0] = f_pressure;
     array[1] = f_ASL;

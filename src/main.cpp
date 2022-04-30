@@ -8,7 +8,9 @@
 // State thresholds
 
 #define BURN_ACCEL 12 // Acceleration (m/s2) which when exceeded the state will change to burn
-#define APOGEE_THRESH 0.5 // The distance (m) between the highest altitude recorded and the current altitude to switch to post_apogee
+#define APOGEE_THRESH 0.5 // The distance (m) between the highest altitude recorded and the current altitude to switch to descent
+#define GROUND_TIME_THRESH 10000 // number of millis which the vertical velocity must be below the ground velocity threshold for the state to switch to ground
+#define GROUND_VEL_THRESH 2 // m/s threshold of the ground velocity
 
 /* Enum responsible for representing the states of flight:
 
@@ -23,6 +25,7 @@
 */
 
 uint32_t f_startTime;
+uint32_t f_groundCheckTime;
 
 enum system_state {
     nav_converge,
@@ -73,14 +76,23 @@ void loop() {
 
             if (data_maxAltitude() > data_smoothAltitude() + APOGEE_THRESH) {
                 state = descent;
+                f_groundCheckTime = millis();
                 Serial.println("STATE: Moving to descent state");
             }
             break;
 
         case descent:
-            // log_logFrame(state);
-            log_dumpToSD(); // This needs to be updated
-            state = grounded;
+            log_logFrame(state);
+
+            if (abs(data_velocityX()) < GROUND_VEL_THRESH) {
+                if (millis() - f_groundCheckTime > GROUND_TIME_THRESH) {
+                    state = grounded;
+                    log_dumpToSD();
+                    Serial.println("STATE: Moving to grounded state");
+                }
+            } else {
+                f_groundCheckTime = millis();
+            }
             break;
 
         case grounded:
