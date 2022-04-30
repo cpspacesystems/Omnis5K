@@ -39,6 +39,8 @@ float f_ASL;
 float f_AGL;
 float f_temperature;
 
+float f_prevAGL = 0;
+float f_velocityX = 0;
 float f_smoothAGL = 0;
 float f_maxAltitude = 0;
 
@@ -121,7 +123,13 @@ void data_update() {
     f_ASL = baro.readAltitude(c_seaPressure);
     f_AGL = f_ASL - u_groundLevel;
     f_temperature = baro.readTemperature();
-    if (c_calibrations > 10) f_smoothAGL = f_smoothAGL + (f_AGL - f_smoothAGL) * 0.05f;
+
+    if (c_calibrations > 10)  {
+        f_smoothAGL = f_smoothAGL + (f_AGL - f_smoothAGL) * 0.05f;
+        f_velocityX = (f_AGL - f_prevAGL) / f_deltaTime;
+    }
+
+    f_prevAGL = f_AGL;
 
     if (f_smoothAGL > f_maxAltitude) {
         f_maxAltitude = f_smoothAGL;
@@ -182,6 +190,7 @@ void data_valuesArray(float* array) {
     array[8] = f_gyroX;
     array[9] = f_gyroY;
     array[10] = f_gyroZ;
+    array[11] = f_velocityX;
 }
 
 void logCalibration() {
@@ -192,9 +201,9 @@ void logCalibration() {
 
 void logSensors() {
 
-    Serial.print("Accel (m/s2): ");
-    Serial.print(f_accelMag);
-    Serial.print("\t");
+    //Serial.print("Accel (m/s2): ");
+    //Serial.print(f_accelMag);
+    //Serial.print("\t");
 
     //Serial.print("Accel (m/s2): ");
     //Serial.print(f_accelX);
@@ -204,17 +213,19 @@ void logSensors() {
     //Serial.print(f_accelZ);
     //Serial.print("\t");
 
-    Serial.print("Smooth Alt (m): ");
-    Serial.print(f_smoothAGL);
-    Serial.print("\t");
+    //Serial.print("Smooth Alt (m): ");
+    //Serial.print(f_smoothAGL);
+    //Serial.print("\t");
 
-    Serial.print("Max alt (m): ");
-    Serial.print(f_maxAltitude);
-    Serial.print("\t");
+    //Serial.print("Max alt (m): ");
+    //Serial.print(f_maxAltitude);
+    //Serial.print("\t");
 
-    Serial.print("Temp (c): ");
-    Serial.println(f_temperature);
+    //Serial.print("Temp (c): ");
+    //Serial.println(f_temperature);
 
     //Serial.println(String(orientation.a) + ", " + String(orientation.b) + ", " + String(orientation.c) + ", " + String(orientation.d));
+
+    Serial.println(f_velocityX);
 
 }

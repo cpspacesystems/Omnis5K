@@ -76,7 +76,7 @@ void log_dumpToSD() {
 
     // Open file and log column labels
     logFile = SD.open(name, FILE_WRITE);
-    logFile.println("frame,state,pressure,ASL,AGL,smoothAGL,temp,accelX,accelY,accelZ,gyroX,gyroY,gyroZ");
+    logFile.println("frame,state,pressure,ASL,AGL,smoothAGL,temp,accelX,accelY,accelZ,gyroX,gyroY,gyroZ,velocityX");
 
     uint32_t dataAddr = f_startAddr;
     

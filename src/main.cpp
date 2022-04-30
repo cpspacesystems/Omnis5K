@@ -8,7 +8,6 @@
 // State thresholds
 
 #define BURN_ACCEL 12 // Acceleration (m/s2) which when exceeded the state will change to burn
-#define COAST_ACCEL 10 // When the acceleration (m/s2) is under this value, the state will change from burn to coast
 #define APOGEE_THRESH 0.5 // The distance (m) between the highest altitude recorded and the current altitude to switch to post_apogee
 
 /* Enum responsible for representing the states of flight:
@@ -28,10 +27,8 @@ uint32_t f_startTime;
 enum system_state {
     nav_converge,
     pad_idle,
-    burn,
-    coast,
-    post_apogee,
-    chute_deployed,
+    ascent,
+    descent,
     grounded
 } state;
 
@@ -65,46 +62,26 @@ void loop() {
 
 
         case pad_idle:
-            //Serial.println("PAD_IDLE ");
-
             if (data_accel() > BURN_ACCEL) {
-                state = burn;
-                Serial.println("STATE: Moving to burn state");
+                state = ascent;
+                Serial.println("STATE: Moving to ascent state");
             }
             break;
 
-
-        case burn:
-            //Serial.print("BURN ");
-            log_logFrame(state);
-
-            if (data_accel() < COAST_ACCEL) {
-                state = coast;
-                Serial.println("STATE: Moving to coast state");
-            }
-            break;
-
-
-        case coast:
-            //Serial.print("COAST ");
+        case ascent:
             log_logFrame(state);
 
             if (data_maxAltitude() > data_smoothAltitude() + APOGEE_THRESH) {
-                state = post_apogee;
-                Serial.println("STATE: Moving to post_apogee state");
-                log_dumpToSD();
+                state = descent;
+                Serial.println("STATE: Moving to descent state");
             }
             break;
 
-
-        case post_apogee:
-            //Serial.println("POST APOGEE ");
+        case descent:
+            // log_logFrame(state);
+            log_dumpToSD(); // This needs to be updated
+            state = grounded;
             break;
-
-
-        case chute_deployed:
-            break;
-
 
         case grounded:
             break;
