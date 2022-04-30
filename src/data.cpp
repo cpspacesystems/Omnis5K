@@ -82,7 +82,7 @@ void data_init() {
     f_deltaTime = 0.0f;
 }
 
-void data_calibrate() {
+int data_calibrate() {
 
     baro.performReading();
     gyro.readSensor();
@@ -103,6 +103,7 @@ void data_calibrate() {
     }
 
     c_calibrations++;
+    return c_calibrations;
 }
 
 void data_update() {
