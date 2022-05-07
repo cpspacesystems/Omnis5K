@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "data.h"
 #define TEL Serial5
 #define BAUD 57600
 
@@ -8,5 +9,14 @@ void telemetry_init() {
 }
 
 void telemetry_send() {
-    TEL.println("Hello");
+
+    float arr[DATA_FRAME_SIZE];
+    data_valuesArray(arr);
+
+    for (int i = 0; i < DATA_FRAME_SIZE; i++) {
+        TEL.print(arr[i]);
+        TEL.print(",");
+    }
+
+    TEL.println();
 }
