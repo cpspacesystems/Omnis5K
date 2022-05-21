@@ -52,6 +52,8 @@ float f_accelMag;
 float f_gyroX;
 float f_gyroY;
 float f_gyroZ;
+// The packet id
+int i_id = 0;
 
 Quaternion orientation;
 
@@ -70,7 +72,7 @@ void data_init() {
     error_assert(accel.begin(), 1, ACCEL_ERR_OFFSET, "accel.begin()");
     error_assert(accel.setOdr(Bmi088Accel::ODR_1600HZ_BW_280HZ), 1, ACCEL_ERR_OFFSET, "accel.setOdr()");
     error_assert(accel.setRange(Bmi088Accel::RANGE_12G), 1, ACCEL_ERR_OFFSET, "accel.setRange()");
-    
+
     Serial.println("INIT: Gyro");
 
     error_assert(gyro.begin(), 1, GYRO_ERR_OFFSET, "gyro.begin()");
@@ -94,7 +96,7 @@ int data_calibrate() {
         c_gyroBiasX = 0;
         c_gyroBiasY = 0;
         c_gyroBiasZ = 0;
-    
+
     } else {
         c_groundPressure += (baro.readPressure() - c_groundPressure) / c_calibrations;
         c_seaPressure = c_groundPressure * u_altitudeConstant;
@@ -160,6 +162,9 @@ void data_update() {
     Quaternion a = Quaternion::from_axis_angle(f_deltaTime * norm, f_gyroX / norm, f_gyroY / norm, f_gyroZ / norm);
 
     orientation = a * orientation;
+
+    // Incrementing packet id
+    i_id++;
 }
 
 float data_accel() {
@@ -183,18 +188,19 @@ float data_velocityX() {
 }
 
 void data_valuesArray(float* array) {
-    array[0] = f_pressure;
-    array[1] = f_ASL;
-    array[2] = f_AGL;
-    array[3] = f_smoothAGL;
-    array[4] = f_temperature;
-    array[5] = f_accelX;
-    array[6] = f_accelY;
-    array[7] = f_accelZ;
-    array[8] = f_gyroX;
-    array[9] = f_gyroY;
-    array[10] = f_gyroZ;
-    array[11] = f_velocityX;
+    array[0] = i_id;
+    array[1] = f_pressure;
+    array[2] = f_ASL;
+    array[3] = f_AGL;
+    array[4] = f_smoothAGL;
+    array[5] = f_temperature;
+    array[6] = f_accelX;
+    array[7] = f_accelY;
+    array[8] = f_accelZ;
+    array[9] = f_gyroX;
+    array[10] = f_gyroY;
+    array[11] = f_gyroZ;
+    array[12] = f_velocityX;
 }
 
 void logCalibration() {
