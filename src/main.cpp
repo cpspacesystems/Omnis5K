@@ -39,7 +39,7 @@ void setup() {
 
     state = nav_converge;
     Serial.begin(9600);
-    
+
     data_init();
     log_init();
     telemetry_init();
@@ -52,6 +52,7 @@ void loop() {
 
     data_update();
     telemetry_send();
+    telemetry_receive();
 
     switch (state) {
         case nav_converge:
