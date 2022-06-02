@@ -14,11 +14,12 @@ void telemetry_send(uint8_t state) {
     float arr[DATA_FRAME_SIZE];
     data_valuesArray(arr);
 
-    for (int i = 0; i < DATA_FRAME_SIZE - 1; i++) {
+    for (int i = 0; i < DATA_FRAME_SIZE; i++) {
         TEL.print(arr[i]);
         TEL.print(",");
     }
-    TEL.print(arr[DATA_FRAME_SIZE - 1]);
+
+    TEL.print(state);
 
     TEL.println();
 }
