@@ -39,6 +39,10 @@ void log_logFrame(uint8_t state) {
     float frame[DATA_FRAME_SIZE];
     data_valuesArray(frame);
 
+    if (f_endAddr > FLASH_CAPACITY - 0x100) {
+        return;
+    }
+
     flash.writeULong(f_endAddr, f_frameIndex);
     f_endAddr += 4;
 

@@ -7,8 +7,8 @@
 
 // State thresholds
 
-#define BURN_ACCEL 12 // Acceleration (m/s2) which when exceeded the state will change to burn
-#define APOGEE_THRESH 0.5 // The distance (m) between the highest altitude recorded and the current altitude to switch to descent
+#define BURN_ACCEL 20 // Acceleration (m/s2) which when exceeded the state will change to burn
+#define APOGEE_THRESH 4 // The distance (m) between the highest altitude recorded and the current altitude to switch to descent
 #define GROUND_TIME_THRESH 10000 // number of millis which the vertical velocity must be below the ground velocity threshold for the state to switch to ground
 #define GROUND_VEL_THRESH 2 // m/s threshold of the ground velocity
 
