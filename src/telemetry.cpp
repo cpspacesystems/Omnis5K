@@ -19,7 +19,7 @@ void telemetry_send(uint8_t state) {
         TEL.print(",");
     }
 
-    TEL.print(state);
+    TEL.print((float)state);
 
     TEL.println();
 }
