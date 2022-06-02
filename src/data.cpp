@@ -55,6 +55,11 @@ float f_gyroZ;
 // The packet id
 int i_id = 0;
 
+float f_longitude;
+float f_latitude;
+float f_altitude;
+int f_satellites;
+
 Quaternion orientation;
 
 void data_init() {
@@ -165,6 +170,11 @@ void data_update() {
 
     // Incrementing packet id
     i_id++;
+
+    f_longitude = 0;
+    f_latitude = 0;
+    f_altitude = 0;
+    f_satellites = 0;
 }
 
 float data_accel() {
@@ -201,6 +211,10 @@ void data_valuesArray(float* array) {
     array[10] = f_gyroY;
     array[11] = f_gyroZ;
     array[12] = f_velocityX;
+    array[13] = f_longitude;
+    array[14] = f_latitude;
+    array[15] = f_altitude;
+    array[16] = (float)f_satellites;
 }
 
 void logCalibration() {
