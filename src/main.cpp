@@ -56,6 +56,7 @@ void loop() {
 
         case ASCENT:
             log_logFrame(state);
+
             if (data_maxAltitude() > data_smoothAltitude() + APOGEE_THRESH) {
                 state = DESCENT;
                 Serial.println("STATE: Moving to descent state");

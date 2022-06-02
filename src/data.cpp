@@ -8,6 +8,9 @@
 #define GYRO_I2C 0x68
 #define BARO_I2C 0x76
 
+#define BAT_PIN 0
+#define BAT_DIV_VAL 1.0
+
 #define CALIBRATION_REQ 100
 
 const float u_groundLevel = 103.632f;
@@ -67,6 +70,8 @@ float f_latitude;
 float f_altitude;
 int f_satellites;
 
+float f_batteryVoltage;
+
 Quaternion orientation;
 
 void data_init() {
@@ -96,6 +101,8 @@ void data_init() {
     f_oldTime = millis();
     f_newTime = 0.0f;
     f_deltaTime = 0.0f;
+
+    pinMode(BAT_PIN, OUTPUT);
 }
 
 bool data_calibrate() {
@@ -191,6 +198,8 @@ void data_update() {
     f_latitude = 0;
     f_altitude = 0;
     f_satellites = 0;
+
+    f_batteryVoltage = (float)analogRead(BAT_PIN) / BAT_DIV_VAL;
 }
 
 float data_accel() {
@@ -231,6 +240,7 @@ void data_valuesArray(float* array) {
     array[14] = f_latitude;
     array[15] = f_altitude;
     array[16] = (float)f_satellites;
+    array[17] = f_batteryVoltage;
 }
 
 void logCalibration() {
