@@ -12,18 +12,6 @@
 #define GROUND_TIME_THRESH 10000 // number of millis which the vertical velocity must be below the ground velocity threshold for the state to switch to ground
 #define GROUND_VEL_THRESH 2 // m/s threshold of the ground velocity
 
-/* Enum responsible for representing the states of flight:
-
-  nav_converge:   calibration of the GPS, IMU, and Barometer
-  pad_idle:       waiting for rocket burn, begin position tracking
-  burn:           begin data logging
-  coast:          dump data if necessary TODO: determine if needed due to space limitations
-  post_apogee:    deploy water from nose cone
-  chute_deployed: dump data if necessary TODO: determine if needed due to space limitations
-  grounded:       end data logging, end position tracking, dump all logged data onto the SD card
-
-*/
-
 uint32_t f_startTime;
 uint32_t f_groundCheckTime;
 
@@ -77,8 +65,9 @@ void loop() {
 
             if (data_maxAltitude() > data_smoothAltitude() + APOGEE_THRESH) {
                 state = descent;
-                f_groundCheckTime = millis();
                 Serial.println("STATE: Moving to descent state");
+                f_groundCheckTime = millis();
+                // eject water here
             }
             break;
 
@@ -88,8 +77,8 @@ void loop() {
             if (abs(data_velocityX()) < GROUND_VEL_THRESH) {
                 if (millis() - f_groundCheckTime > GROUND_TIME_THRESH) {
                     state = grounded;
-                    log_dumpToSD();
                     Serial.println("STATE: Moving to grounded state");
+                    log_dumpToSD();
                 }
             } else {
                 f_groundCheckTime = millis();
