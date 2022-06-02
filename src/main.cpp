@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "BMI088.h"
 
+#include "state.h"
 #include "data.h"
 #include "telemetry.h"
 #include "log.h"
@@ -15,13 +16,7 @@
 uint32_t f_startTime;
 uint32_t f_groundCheckTime;
 
-enum system_state {
-    nav_converge,
-    pad_idle,
-    ascent,
-    descent,
-    grounded
-} state;
+system_state state;
 
 void setup() {
 
@@ -39,7 +34,7 @@ void setup() {
 void loop() {
 
     data_update();
-    telemetry_send();
+    telemetry_send(state);
     telemetry_receive();
 
     switch (state) {
