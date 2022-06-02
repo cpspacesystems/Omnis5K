@@ -22,6 +22,10 @@ float c_gyroBiasX;
 float c_gyroBiasY;
 float c_gyroBiasZ;
 
+float c_accelGravX;
+float c_accelGravY;
+float c_accelGravZ;
+
 // Sensor objects
 
 Bmi088Accel accel(Wire, ACCEL_I2C);
@@ -48,6 +52,7 @@ float f_accelX;
 float f_accelY;
 float f_accelZ;
 float f_accelMag;
+float f_groundAccel;
 
 float f_gyroX;
 float f_gyroY;
@@ -102,6 +107,10 @@ int data_calibrate() {
         c_gyroBiasY = 0;
         c_gyroBiasZ = 0;
 
+        c_accelGravX = 0;
+        c_accelGravY = 0;
+        c_accelGravZ = 0;
+
     } else {
         c_groundPressure += (baro.readPressure() - c_groundPressure) / c_calibrations;
         c_seaPressure = c_groundPressure * u_altitudeConstant;
@@ -109,6 +118,10 @@ int data_calibrate() {
         c_gyroBiasX += (gyro.getGyroX_rads() - c_gyroBiasX) / c_calibrations;
         c_gyroBiasY += (gyro.getGyroY_rads() - c_gyroBiasY) / c_calibrations;
         c_gyroBiasZ += (gyro.getGyroZ_rads() - c_gyroBiasZ) / c_calibrations;
+
+        c_accelGravX += (accel.getAccelX_mss() - c_accelGravX) / c_calibrations;
+        c_accelGravY += (accel.getAccelY_mss() - c_accelGravY) / c_calibrations;
+        c_accelGravZ += (accel.getAccelZ_mss() - c_accelGravZ) / c_calibrations;
     }
 
     c_calibrations++;
@@ -150,6 +163,7 @@ void data_update() {
     f_accelY = accel.getAccelY_mss();
     f_accelZ = accel.getAccelZ_mss();
     f_accelMag = sqrt(sq(f_accelX) + sq(f_accelY) + sq(f_accelZ));
+    f_groundAccel = sqrt(sq(f_accelX - c_accelGravX) + sq(f_accelY - c_accelGravY) + sq(f_accelZ - c_accelGravZ));
 
     // Update gyroscope data
 
@@ -178,7 +192,7 @@ void data_update() {
 }
 
 float data_accel() {
-    return f_accelMag;
+    return f_groundAccel;
 }
 
 float data_altitude() {
