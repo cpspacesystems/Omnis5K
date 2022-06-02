@@ -5,7 +5,7 @@
 
 void telemetry_init(); // Should be called on power up.
 
-void telemetry_send(system_state state); // Sends data over telemetry. Should be called every update.
+void telemetry_send(uint8_t state); // Sends data over telemetry. Should be called every update.
 
 void telemetry_receive(); // Receives commands from telemetry uplink. Should be called once every update.
 void uplink_funcA(String);

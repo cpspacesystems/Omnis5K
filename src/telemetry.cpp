@@ -9,7 +9,7 @@ void telemetry_init() {
     TEL.begin(BAUD);
 }
 
-void telemetry_send(system_state state) {
+void telemetry_send(uint8_t state) {
 
     float arr[DATA_FRAME_SIZE];
     data_valuesArray(arr);

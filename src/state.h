@@ -1,12 +1,10 @@
 #ifndef STATE_H
 #define STATA_H
 
-enum system_state {
-    nav_converge,
-    pad_idle,
-    ascent,
-    descent,
-    grounded
-};
+#define NAV_CONVERGE 0
+#define PAD_IDLE 1
+#define ASCENT 2
+#define DESCENT 3
+#define GROUNDED 4
 
 #endif

@@ -16,11 +16,11 @@
 uint32_t f_startTime;
 uint32_t f_groundCheckTime;
 
-system_state state;
+uint8_t state;
 
 void setup() {
 
-    state = nav_converge;
+    state = NAV_CONVERGE;
     Serial.begin(9600);
 
     data_init();
@@ -38,40 +38,40 @@ void loop() {
     telemetry_receive();
 
     switch (state) {
-        case nav_converge:
+        case NAV_CONVERGE:
             //Serial.println("NAV_CONV ");
 
             if (data_calibrate() > 100) {
-                state = pad_idle;
+                state = PAD_IDLE;
                 Serial.println("STATE: Moving to pad_idle state");
             }
             break;
 
 
-        case pad_idle:
+        case PAD_IDLE:
             if (data_accel() > BURN_ACCEL) {
-                state = ascent;
+                state = ASCENT;
                 Serial.println("STATE: Moving to ascent state");
             }
             break;
 
-        case ascent:
+        case ASCENT:
             log_logFrame(state);
 
             if (data_maxAltitude() > data_smoothAltitude() + APOGEE_THRESH) {
-                state = descent;
+                state = DESCENT;
                 Serial.println("STATE: Moving to descent state");
                 f_groundCheckTime = millis();
                 // eject water here
             }
             break;
 
-        case descent:
+        case DESCENT:
             log_logFrame(state);
 
             if (abs(data_velocityX()) < GROUND_VEL_THRESH) {
                 if (millis() - f_groundCheckTime > GROUND_TIME_THRESH) {
-                    state = grounded;
+                    state = GROUNDED;
                     Serial.println("STATE: Moving to grounded state");
                     log_dumpToSD();
                 }
@@ -80,7 +80,7 @@ void loop() {
             }
             break;
 
-        case grounded:
+        case GROUNDED:
             break;
 
     }
