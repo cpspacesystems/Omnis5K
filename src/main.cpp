@@ -8,7 +8,7 @@
 
 // State thresholds
 
-#define BURN_ACCEL 20 // Acceleration (m/s2) which when exceeded the state will change to burn
+#define BURN_ACCEL 5 // Acceleration (m/s2) which when exceeded the state will change to burn
 #define APOGEE_THRESH 4 // The distance (m) between the highest altitude recorded and the current altitude to switch to descent
 #define GROUND_TIME_THRESH 10000 // number of millis which the vertical velocity must be below the ground velocity threshold for the state to switch to ground
 #define GROUND_VEL_THRESH 2 // m/s threshold of the ground velocity
@@ -39,9 +39,8 @@ void loop() {
 
     switch (state) {
         case NAV_CONVERGE:
-            //Serial.println("NAV_CONV ");
 
-            if (data_calibrate() > 100) {
+            if (data_calibrate()) {
                 state = PAD_IDLE;
                 Serial.println("STATE: Moving to pad_idle state");
             }
@@ -57,7 +56,6 @@ void loop() {
 
         case ASCENT:
             log_logFrame(state);
-
             if (data_maxAltitude() > data_smoothAltitude() + APOGEE_THRESH) {
                 state = DESCENT;
                 Serial.println("STATE: Moving to descent state");

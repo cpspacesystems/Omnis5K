@@ -8,6 +8,8 @@
 #define GYRO_I2C 0x68
 #define BARO_I2C 0x76
 
+#define CALIBRATION_REQ 100
+
 const float u_groundLevel = 103.632f;
 const float u_altitudeConstant = pow(1 - u_groundLevel / 44330.0, -5.2549) / 100.0;
 
@@ -96,7 +98,7 @@ void data_init() {
     f_deltaTime = 0.0f;
 }
 
-int data_calibrate() {
+bool data_calibrate() {
 
     baro.performReading();
     gyro.readSensor();
@@ -125,7 +127,7 @@ int data_calibrate() {
     }
 
     c_calibrations++;
-    return c_calibrations;
+    return c_calibrations > CALIBRATION_REQ;
 }
 
 void data_update() {
@@ -151,7 +153,7 @@ void data_update() {
 
     f_prevAGL = f_AGL;
 
-    if (f_smoothAGL > f_maxAltitude) {
+    if (f_smoothAGL > f_maxAltitude && c_calibrations > CALIBRATION_REQ) {
         f_maxAltitude = f_smoothAGL;
     }
 
