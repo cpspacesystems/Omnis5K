@@ -8,8 +8,7 @@
 #define GYRO_I2C 0x68
 #define BARO_I2C 0x76
 
-#define BAT_PIN 0
-#define BAT_DIV_VAL 1.0
+#define BAT_PIN A9
 
 #define CALIBRATION_REQ 100
 
@@ -199,7 +198,7 @@ void data_update() {
     f_altitude = 0;
     f_satellites = 0;
 
-    f_batteryVoltage = (float)analogRead(BAT_PIN) / BAT_DIV_VAL;
+    f_batteryVoltage = ((((float)analogRead(BAT_PIN) / 1023.0) * 3.3) * (9.92 + 30.1)) / 9.92;;
 }
 
 float data_accel() {
