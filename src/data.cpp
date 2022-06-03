@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "BMI088.h"
 #include "Adafruit_BMP3XX.h"
+
+#include "debug.h"
 #include "gps.h"
 #include "Quaternion.h"
 #include "error.h"
@@ -76,7 +78,7 @@ Quaternion orientation;
 
 void data_init() {
 
-    Serial.println("INIT: baro");
+    debug_println("INIT: baro");
 
     error_assert(baro.begin_I2C(BARO_I2C), 1, BARO_ERR_OFFSET, "baro.begin_I2C");
     error_assert(baro.setTemperatureOversampling(BMP3_NO_OVERSAMPLING), 1, BARO_ERR_OFFSET, "baro.setTemperatureOversampling");
@@ -84,13 +86,13 @@ void data_init() {
     error_assert(baro.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_15), 1, BARO_ERR_OFFSET, "baro.setIIRFilterCoeff");
     error_assert(baro.setOutputDataRate(BMP3_ODR_200_HZ), 1, BARO_ERR_OFFSET, "baro.setOutputDataRate");
 
-    Serial.println("INIT: Accel");
+    debug_println("INIT: Accel");
 
     error_assert(accel.begin(), 1, ACCEL_ERR_OFFSET, "accel.begin()");
     error_assert(accel.setOdr(Bmi088Accel::ODR_1600HZ_BW_280HZ), 1, ACCEL_ERR_OFFSET, "accel.setOdr()");
     error_assert(accel.setRange(Bmi088Accel::RANGE_12G), 1, ACCEL_ERR_OFFSET, "accel.setRange()");
 
-    Serial.println("INIT: Gyro");
+    debug_println("INIT: Gyro");
 
     error_assert(gyro.begin(), 1, GYRO_ERR_OFFSET, "gyro.begin()");
     error_assert(gyro.setOdr(Bmi088Gyro::ODR_400HZ_BW_47HZ), 1, GYRO_ERR_OFFSET, "gyro.setOdr()");
@@ -244,42 +246,41 @@ void data_valuesArray(float* array) {
     array[14] = f_latitude;
     array[15] = f_altitude;
     array[16] = (float)f_satellites;
-    array[17] = f_batteryVoltage;
 }
 
 void logCalibration() {
-    Serial.print("Sea Pressure (pa): " + String(c_seaPressure) + "\t");
-    Serial.print("Gyro bias (r/s2): " + String(c_gyroBiasX) + ", " + String(c_gyroBiasY) + ", " + String(c_gyroBiasZ) + "\t");
-    Serial.println();
+    debug_print(("Sea Pressure (pa): " + String(c_seaPressure) + "\t").c_str());
+    debug_print(("Gyro bias (r/s2): " + String(c_gyroBiasX) + ", " + String(c_gyroBiasY) + ", " + String(c_gyroBiasZ) + "\t").c_str());
+    debug_println("");
 }
 
 void logSensors() {
 
-    //Serial.print("Accel (m/s2): ");
-    //Serial.print(f_accelMag);
-    //Serial.print("\t");
+    //debug_print("Accel (m/s2): ");
+    //debug_print(f_accelMag);
+    //debug_print("\t");
 
-    //Serial.print("Accel (m/s2): ");
-    //Serial.print(f_accelX);
-    //Serial.print(", ");
-    //Serial.print(f_accelY);
-    //Serial.print(", ");
-    //Serial.print(f_accelZ);
-    //Serial.print("\t");
+    //debug_print("Accel (m/s2): ");
+    //debug_print(f_accelX);
+    //debug_print(", ");
+    //debug_print(f_accelY);
+    //debug_print(", ");
+    //debug_print(f_accelZ);
+    //debug_print("\t");
 
-    //Serial.print("Smooth Alt (m): ");
-    //Serial.print(f_smoothAGL);
-    //Serial.print("\t");
+    //debug_print("Smooth Alt (m): ");
+    //debug_print(f_smoothAGL);
+    //debug_print("\t");
 
-    //Serial.print("Max alt (m): ");
-    //Serial.print(f_maxAltitude);
-    //Serial.print("\t");
+    //debug_print("Max alt (m): ");
+    //debug_print(f_maxAltitude);
+    //debug_print("\t");
 
-    //Serial.print("Temp (c): ");
-    //Serial.println(f_temperature);
+    //debug_print("Temp (c): ");
+    //debug_println(f_temperature);
 
-    //Serial.println(String(orientation.a) + ", " + String(orientation.b) + ", " + String(orientation.c) + ", " + String(orientation.d));
+    //debug_println(String(orientation.a) + ", " + String(orientation.b) + ", " + String(orientation.c) + ", " + String(orientation.d));
 
-    Serial.println(f_velocityX);
+    debug_println(f_velocityX);
 
 }

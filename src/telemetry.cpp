@@ -1,11 +1,12 @@
 #include <Arduino.h>
+#include "debug.h"
 #include "data.h"
 #include "telemetry.h"
 #define TEL Serial5
 #define BAUD 57600
 
 void telemetry_init() {
-    Serial.println("INIT: Telemetry");
+    debug_println("INIT: Telemetry");
     TEL.begin(BAUD);
 }
 
@@ -54,42 +55,42 @@ void telemetry_receive() {
             uplink_funcH(msg);
 
         else{
-            Serial.println("Command not recognized:");
-            Serial.println(msg);
+            debug_println("Command not recognized:");
+            debug_println(msg.c_str());
         }
     }
 }
 
 void uplink_funcA(String input){
-    Serial.println("Running funcA");
-    Serial.print("Received ");
-    Serial.println(input);
+    debug_println("Running funcA");
+    debug_print("Received ");
+    debug_println(input.c_str());
 }
 
 void uplink_funcB(String input){
-    Serial.println("Running funcB");
+    debug_println("Running funcB");
 }
 
 void uplink_funcC(String input){
-    Serial.println("Running funcC");
+    debug_println("Running funcC");
 }
 
 void uplink_funcD(String input){
-    Serial.println("Running funcD");
+    debug_println("Running funcD");
 }
 
 void uplink_funcE(String input){
-    Serial.println("Running funcB");
+    debug_println("Running funcB");
 }
 
 void uplink_funcF(String input){
-    Serial.println("Running funcC");
+    debug_println("Running funcC");
 }
 
 void uplink_funcG(String input){
-    Serial.println("Running funcD");
+    debug_println("Running funcD");
 }
 
 void uplink_funcH(String input){
-    Serial.println("Running funcD");
+    debug_println("Running funcD");
 }

@@ -2,8 +2,11 @@
 #include <Arduino.h>
 #include <SD.h>
 #include "SPIMemory.h"
+#include "debug.h"
 #include "data.h"
 #include "error.h"
+
+//#define NO_LOG
 
 #define FLASH_PIN 0xA
 #define FLASH_CAPACITY 0x1000000
@@ -20,12 +23,16 @@ SPIFlash flash(FLASH_PIN);
 
 void log_init() {
 
-    Serial.println("INIT: Flash");
+#ifdef NO_LOG
+    return;
+#endif
+
+    debug_println("INIT: Flash");
 
     error_assert(flash.begin(), true, FLASH_ERR_OFFSET, "flash.begin()");
     error_assert(flash.eraseChip(), true, FLASH_ERR_OFFSET, "flash.eraseChip()"); // Probably should change this to be more dynamic
 
-    Serial.println("INIT: SD");
+    debug_println("INIT: SD");
 
     error_assert(SD.begin(SD_PIN), true, SD_ERR_OFFSET, "SD.begin()");
 
@@ -36,10 +43,15 @@ void log_init() {
 
 void log_logFrame(uint8_t state) {
 
+#ifdef NO_LOG
+    return;
+#endif
+
     float frame[DATA_FRAME_SIZE];
     data_valuesArray(frame);
 
     if (f_endAddr > FLASH_CAPACITY - 0x100) {
+        debug_println("FLASH FULL");
         return;
     }
 
@@ -60,6 +72,10 @@ void log_logFrame(uint8_t state) {
 
 void log_dumpToSD() {
 
+#ifdef NO_LOG
+    return;
+#endif
+
     // Search for a unique file name on the SD card
 
     int fileNum = 0;
@@ -72,15 +88,15 @@ void log_dumpToSD() {
         strcat(name, "log_");
         strcat(name, num);
         strcat(name, ".csv");
-        Serial.print("Tried file name ");
-        Serial.println(name);
+        debug_print("Tried file name ");
+        debug_println(name);
         if (!SD.exists(name)) break;
         fileNum++;
     }
 
     // Open file and log column labels
     logFile = SD.open(name, FILE_WRITE);
-    logFile.println("frame,state,pressure,ASL,AGL,smoothAGL,temp,accelX,accelY,accelZ,gyroX,gyroY,gyroZ,velocityX");
+    logFile.println("frame,state,pressure,ASL,AGL,smoothAGL,temp,accelX,accelY,accelZ,gyroX,gyroY,gyroZ,velocityX,longitude,latitude,altitude,satellites");
 
     uint32_t dataAddr = f_startAddr;
     

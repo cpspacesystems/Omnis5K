@@ -1,7 +1,7 @@
 #ifndef DATA_H
 #define DATA_H
 
-#define DATA_FRAME_SIZE 18
+#define DATA_FRAME_SIZE 17
 
 void data_init(); // Should be called on power up
 bool data_calibrate(); // Calibrates sensors and measures ground pressure, returns number of calibrations
