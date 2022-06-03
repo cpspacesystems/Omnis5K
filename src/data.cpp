@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "BMI088.h"
 #include "Adafruit_BMP3XX.h"
+#include "gps.h"
 #include "Quaternion.h"
 #include "error.h"
 
@@ -138,6 +139,8 @@ bool data_calibrate() {
 
 void data_update() {
 
+    if (c_calibrations < CALIBRATION_REQ) return;
+
     // Update timing
 
     f_newTime = millis();
@@ -193,12 +196,14 @@ void data_update() {
     // Incrementing packet id
     i_id++;
 
-    f_longitude = 0;
-    f_latitude = 0;
-    f_altitude = 0;
-    f_satellites = 0;
+    GpsData gpsData = gps_getData();
 
-    f_batteryVoltage = ((((float)analogRead(BAT_PIN) / 1023.0) * 3.3) * (9.92 + 30.1)) / 9.92;;
+    f_longitude = gpsData.longitude;
+    f_latitude = gpsData.latitude;
+    f_altitude = gpsData.altitude;
+    f_satellites = gpsData.satellites;
+
+    f_batteryVoltage = ((((float)analogRead(BAT_PIN) / 1023.0) * 3.3) * (9.92 + 30.1)) / 9.92;
 }
 
 float data_accel() {

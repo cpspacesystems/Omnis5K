@@ -5,6 +5,7 @@
 #include "data.h"
 #include "telemetry.h"
 #include "log.h"
+#include "gps.h"
 
 // State thresholds
 
@@ -26,14 +27,17 @@ void setup() {
     data_init();
     log_init();
     telemetry_init();
+    gps_init();
     delay(500);
     f_startTime = millis();
     Serial.println("STATE: Moving to nav_converge state");
 }
 
-void loop() {
 
+void loop() {
+    
     data_update();
+    gps_update();
     telemetry_send(state);
     telemetry_receive();
 
